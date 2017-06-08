@@ -1,0 +1,42 @@
+# Administration from an API or external application
+
+All the commands executable online can equally be used via an API
+
+The API uses the address https://YOURSERVER/yunohost/api and all actions are detailed on this page.
+
+Firstly, you need to retrieve a connection cookie to perform these actions. Here is an example via curl:
+```bash
+    Login (avec mot de passe admin): curl -k -d “password=XXX” –dump-header headers https://YOURSERVER/yunohost/api/login
+    GET: curl -k -i -H “Accept: application/json” -H “Content-Type: application/json” -L -b headers -X GET https://YOURSERVER/yunohost/api/ROUTE | grep }| python -mjson.tool
+```
+
+To simplify remote administration of a YunoHost instance as part of a [CHATONS](https://chatons.org/) project, API classes have been developed by users.
+
+For example, this PHP class will allow you to administer your YunoHost instance from a PHP application (web site, storage management tool ...).
+
+Here is a sample PHP code snipet to add a user to your YunoHost instance:
+```bash 
+require("ynh_api.class.php");
+$ynh = new YNH_API("IP address of your YunoHost server or your Hostname", "admin password");
+
+if ($ynh->login()) {
+    $domains = $ynh->get("/domains");
+    $first_domain = $domains['domains'][0];
+
+    $arguments = array(
+        'username' => 'test',
+        'password' => 'yunohost', 
+        'firstname' => 'name',
+        'lastname' => 'second_name',
+        'mail' => 'test@'.$first_domain,
+        'mailbox_quota' => '500M'
+    );
+
+    $user_add = $ynh->post("/users", $arguments);
+    print_r($user_add);
+
+} else {
+    print("Login to YunoHost failed.\n");
+    exit;
+}
+```
